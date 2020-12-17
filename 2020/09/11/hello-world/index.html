@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <title>Hello World</title>
 
-    <meta name="author" content="czmx">
+    <meta name="author" content="pf #_">
 
     <link rel="shortcut icon" href="/images/favicon.png">
 
@@ -72,15 +72,25 @@
 
     
 
-<meta name="generator" content="Hexo 5.1.1"></head>
+<meta name="generator" content="Hexo 5.2.0"></head>
 <body>
 
 <header role="banner">
     <hgroup>
-        <h1><a href="/">虫子的梦想</a></h1>
+        <h1><a href="/">PF #<span id="pf_">_</span></a></h1>
+        
+            <h2>The Art of software design</h2>
         
     </hgroup>
 </header>
+
+<!-- 输入提示符闪烁 -->
+<script>
+    let _dom = $('#pf_');
+    setInterval(function () {
+        _dom.fadeOut(300).fadeIn(300);
+    }, 1000);
+</script>
 
 <nav role="navigation">
     
@@ -134,7 +144,7 @@
         </div>
         <footer>
             <p class="meta">
-                <span class="byline author vcard">Posted by <span class="fn">czmx</span></span>
+                <span class="byline author vcard">Posted by <span class="fn">pf #_</span></span>
                 <time datetime="2020-09-11T14:28:05.370Z" data-updated="true">Fri Sep 11 2020</time>
                 
             </p>
@@ -154,6 +164,46 @@
             </p>
         </footer>
     </article>
+
+    
+        <section>
+    <h1>Comments</h1>
+
+    <div id="disqus_thread"></div>
+
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT
+         *  THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR
+         *  PLATFORM OR CMS.
+         *
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT:
+         *  https://disqus.com/admin/universalcode/#configuration-variables
+         */
+        var canonicalUrl = 'http://example.com/2020/09/11/hello-world/';
+
+        var disqus_config = function () {
+           // Replace PAGE_URL with your page's canonical URL variable
+           this.page.url = canonicalUrl;
+
+           // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+           this.page.identifier = canonicalUrl;
+        };
+
+        (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+            var d = document, s = d.createElement('script');
+
+            // IMPORTANT: Replace EXAMPLE with your forum shortname!
+            s.src = 'https://your_website_shortname.disqus.com/embed.js';
+
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+</section>
 
     
 
@@ -220,7 +270,7 @@
 
 <footer role="contentinfo">
     <p>
-        Copyright © 2020 - czmx -
+        Copyright © 2020 - pf #_ -
         <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
     </p>
 </footer>
