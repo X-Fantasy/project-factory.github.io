@@ -104,6 +104,13 @@ body > div > div {
     font-family: "PT Serif", "Georgia", "Helvetica Neue", Arial, sans-serif
 }
 
+#pf_ {
+    display: none;
+    position: relative;
+    top: -6px;
+    left: 3px;
+}
+
 .sans, body > header h2, article header p.meta, article > footer, #content .blog-index footer, html .gist .gist-file .gist-meta, #blog-archives a.category, #blog-archives time, aside.sidebar section, body > footer {
     font-family: "PT Sans", "Helvetica Neue", Arial, sans-serif
 }
@@ -446,7 +453,6 @@ body div.pagination {
 .pagination .page-number {
     display: none;
 }
-
 
 
 body > header {
