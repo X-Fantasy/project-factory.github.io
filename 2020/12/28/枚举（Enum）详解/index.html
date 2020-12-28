@@ -1,0 +1,191 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="zh-CN"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="zh-CN"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="zh-CN"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>Java 枚举（Enum）类型详解</title>
+
+    <meta name="author" content="pf #_">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="https://laravel.design/2020/12/28/枚举（Enum）详解/">
+
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+        <!-- stylesheets list from config.yml -->
+        
+            <link rel="stylesheet" href="/css/optimize.css">
+        
+    
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">PF #<b id="pf_">_</b></a></h1>
+        
+            <h2>The Art of software design</h2>
+        
+    </hgroup>
+</header>
+
+<!-- 输入提示符闪烁 -->
+<script>
+    let _dom = $('#pf_');
+    let hideFn = function () {
+        _dom.hide();
+    };
+    setInterval(function () {
+        _dom.show();
+        setTimeout(hideFn, 1000);
+    }, 2000);
+</script>
+
+<nav role="navigation">
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:https://laravel.design/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">Java 枚举（Enum）类型详解</h1>
+            <p class="meta">
+                <time datetime="2020-12-28T10:48:34.000Z" data-updated="true">Mon Dec 28 2020</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p><code>enum</code> 是在 JDK 1.5 版本才引入的新特性。在 Java 中，被 <code>enum</code> 关键字修饰的类型就是枚举类型：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Weekday</span> </span>&#123;</span><br><span class="line">    MON, TUE, WED, THU, FRI, SAT, SUN</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>声明为 Weekday 类型的变量，只能存储这个枚举类型声明中给定的某个枚举值，或者 null 值，null 表示这个变量没有设置任何值。</p>
+<p>注意：在定义枚举类型时，我们所使用的关键字是 <code>enum</code>，用法与 <code>class</code> 关键字类似，只不过前者定义枚举类型，后者是定义类。 <strong>枚举值一般都是大写的字母，任意两个枚举成员不能具有相同的名称，且它的常数值必须在该枚举的基础类型的范围之内，多个枚举成员之间使用逗号分隔。</strong></p>
+<h2 id="本质"><a href="#本质" class="headerlink" title="本质"></a>本质</h2><p>尽管 <code>enum</code> 看起来像是一种新的数据类型，事实上，<code>enum</code> 的本质是一种受限制的类，并且具有自己的方法，这些后面再细说。</p>
+<p>在使用关键字 <code>enum</code> 创建枚举类型并编译后，编译器会为你生成一个相关的类，这个类继承自 <code>java.lang.Enum</code>  类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Enum</span>&lt;<span class="title">E</span> <span class="keyword">extends</span> <span class="title">Enum</span>&lt;<span class="title">E</span>&gt;&gt;</span></span><br><span class="line"><span class="class">        <span class="keyword">implements</span> <span class="title">Comparable</span>&lt;<span class="title">E</span>&gt;, <span class="title">Serializable</span> </span>&#123; ... &#125;</span><br></pre></td></tr></table></figure>
+
+<p>让我们看看反编译 Weekday.class 之后的结果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">WeekDay</span> <span class="keyword">extends</span> <span class="title">Enum</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> WeekDay[] values()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> (WeekDay[])$VALUES.clone();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> WeekDay <span class="title">valueOf</span><span class="params">(String name)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (WeekDay)Enum.valueOf(problems/enumeration/WeekDay, name);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">WeekDay</span><span class="params">(String s, <span class="keyword">int</span> i)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(s, i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> WeekDay MON;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> WeekDay TUE;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> WeekDay WED;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> WeekDay THU;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> WeekDay FRI;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> WeekDay SAT;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> WeekDay SUN;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> WeekDay $VALUES[];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> </span><br><span class="line">    &#123;</span><br><span class="line">        MON = <span class="keyword">new</span> WeekDay(<span class="string">&quot;MON&quot;</span>, <span class="number">0</span>);</span><br><span class="line">        TUE = <span class="keyword">new</span> WeekDay(<span class="string">&quot;TUE&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        WED = <span class="keyword">new</span> WeekDay(<span class="string">&quot;WED&quot;</span>, <span class="number">2</span>);</span><br><span class="line">        THU = <span class="keyword">new</span> WeekDay(<span class="string">&quot;THU&quot;</span>, <span class="number">3</span>);</span><br><span class="line">        FRI = <span class="keyword">new</span> WeekDay(<span class="string">&quot;FRI&quot;</span>, <span class="number">4</span>);</span><br><span class="line">        SAT = <span class="keyword">new</span> WeekDay(<span class="string">&quot;SAT&quot;</span>, <span class="number">5</span>);</span><br><span class="line">        SUN = <span class="keyword">new</span> WeekDay(<span class="string">&quot;SUN&quot;</span>, <span class="number">6</span>);</span><br><span class="line">        $VALUES = (<span class="keyword">new</span> WeekDay[] &#123;</span><br><span class="line">            MON, TUE, WED, THU, FRI, SAT, SUN</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从反编译的代码可以看出编译器确实帮助我们生成了一个 <code>Weekday</code> 类，它继承自 <code>java.lang.Enum</code> 抽象类，并且该类是 <code>final</code> 修饰的，将无法被继承。</p>
+<p>除此之外，编译器还帮我们生成了七个 <code>Weekday</code> 类型的静态常量，分别对应枚举中定义的七个日期，这也充分说明了当我们定义一个枚举类型时，每一个枚举类型成员都可以看作是 Enum 类的实例，这些枚举成员默认都被 public static final 进行修饰，当使用枚举类型成员时，直接使用枚举名称调用成员即可。</p>
+<p>注意编译器还为我们生成了两个静态方法，分别是 <code>values()</code> 和 <code>valueOf()</code>，前者返回我们定义的所有枚举成员，后者可以可以按照枚举成员名称获取对应的枚举值。</p>
+<h2 id="java-lang-Enum-类方法"><a href="#java-lang-Enum-类方法" class="headerlink" title="java.lang.Enum 类方法"></a>java.lang.Enum 类方法</h2><p>Enum 类是所有 Java 语言枚举类型的公共基类（注意 Enum 是抽象类），以下是它的常见方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">compareTo</span> <span class="params">(E o)</span></span>&#123;&#125; <span class="comment">// 比较此枚举与指定对象的顺序</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">equals</span> <span class="params">(Object other)</span></span>&#123;&#125; <span class="comment">// 当指定对象等于此枚举常量时，返回 true</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Class&lt;E&gt; <span class="title">getDeclaringClass</span><span class="params">()</span></span>&#123;&#125; <span class="comment">// 返回与此枚举常量的枚举类型相对应的 Class 对象</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> String <span class="title">name</span><span class="params">()</span></span>&#123;&#125; <span class="comment">// 返回此枚举常量的名称，在其枚举声明中对其进行声明</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">ordinal</span><span class="params">()</span></span>&#123;&#125; <span class="comment">// 返回枚举常量的序数（它在枚举声明中的位置，其中初始常量序数为零）</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span></span>&#123;&#125; <span class="comment">// 返回枚举常量的名称，它包含在声明中</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>未完待续。</p>
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">pf #_</span></span>
+                <time datetime="2020-12-28T10:48:34.000Z" data-updated="true">Mon Dec 28 2020</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/Java/">Java</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+</div>
+
+            <p class="meta">
+                
+
+                
+                <a class="basic-alignment right" href="/" title="Previous Post: Hello World">Hello World »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/12/28/%E6%9E%9A%E4%B8%BE%EF%BC%88Enum%EF%BC%89%E8%AF%A6%E8%A7%A3/">Java 枚举（Enum）类型详解</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/09/11/hello-world/">Hello World</a></li></ul>
+</section>
+
+<section class="even">
+    <h1>Featured posts</h1>
+    <ul>
+        
+    </ul>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2020 - pf #_ -
+        <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
+    </p>
+</footer>
+
+
+
+</body>
+</html>

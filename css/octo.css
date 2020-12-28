@@ -21,7 +21,7 @@ table {
 }
 
 caption, th, td {
-    text-align: left;
+    /*text-align: left;*/
     font-weight: normal;
     vertical-align: middle
 }

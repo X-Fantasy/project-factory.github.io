@@ -1,0 +1,45 @@
+/* 自定义样式标识 */
+.custom {
+}
+
+/* 列表标签优化 */
+.custom ol {
+    box-sizing: border-box;
+    padding-left: 1em;
+}
+
+.custom ul {
+    box-sizing: border-box;
+    padding-left: 1em;
+}
+
+
+/*-- 表格样式优化 --*/
+.custom table {
+    width: 100%;
+    border: 1px solid #dedede;
+    margin: 15px auto;
+    border-collapse: collapse;
+    empty-cells: show;
+    word-break: break-word;
+    margin-bottom: 1.5em;
+}
+
+.custom table th, .custom table td {
+    height: 38px;
+    border: 1px solid #dedede;
+    padding: 0 10px;
+    font-size: 14px;
+    min-width: 100px;
+    max-width: 100%;
+}
+
+.custom table th {
+    font-size: 16px;
+    background-color: #efefef;
+    white-space: nowrap;
+}
+
+.custom table td:last-child {
+    width: 100%;
+}
