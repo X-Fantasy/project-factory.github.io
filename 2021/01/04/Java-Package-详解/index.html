@@ -1,0 +1,261 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="zh-CN"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="zh-CN"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="zh-CN"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>Java Package 详解</title>
+
+    <meta name="author" content="pf #_">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="https://laravel.design/2021/01/04/Java-Package-详解/">
+
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+        <!-- stylesheets list from config.yml -->
+        
+            <link rel="stylesheet" href="/css/optimize.css">
+        
+    
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">PF #<b id="pf_">_</b></a></h1>
+        
+            <h2>The Art of software design</h2>
+        
+    </hgroup>
+</header>
+
+<!-- 输入提示符闪烁 -->
+<script>
+    let _dom = $('#pf_');
+    let hideFn = function () {
+        _dom.hide();
+    };
+    setInterval(function () {
+        _dom.show();
+        setTimeout(hideFn, 1000);
+    }, 2000);
+</script>
+
+<nav role="navigation">
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:https://laravel.design/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">Java Package 详解</h1>
+            <p class="meta">
+                <time datetime="2021-01-04T02:50:31.000Z" data-updated="true">Mon Jan 04 2021</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <p>Java 允许使用包（package）将类组织起来。借助于包，开发者可以方便地组织自己的代码，并将自己的代码与别人提供的代码库分开管理。</p>
+<p>标准的 Java 类库分布在多个包中，包括 java.lang、java.util 和 java.net 等。标准的 Java 包具有一个层次结构，如同硬盘的目录嵌套一样，也可以使用嵌套层次组织包。所有标准的 Java 包都处于 java 和 javax 包层次中。</p>
+<p>使用包的主要原因是确保类名的唯一性，只要将两个同名的类放在不同的包下，就不会产生冲突。事实上，为了保证包名的绝对唯一性，Sun 公司建议将公司的因特网域名以逆序的形式作为包名，并且对于不同的项目使用不同的子包。比如 com.aliyun.oss 与 com.aliyun.sms 就可以作为两个不同的项目包名使用。</p>
+<h2 id="Package-的作用"><a href="#Package-的作用" class="headerlink" title="Package 的作用"></a>Package 的作用</h2><p>&lt;&lt;&lt;CUSTOM</p>
+<ol>
+<li>把功能相似或相关的类或接口组织在同一个包中，方便类的查找和使用。</li>
+<li>如同文件夹一样，包也采用了树形目录的存储方式。同一个包中的类名字是不同的，不同的包中的类的名字是可以相同的，当同时调用两个不同包中相同类名的类时，应该加上包名加以区别。因此，包可以避免类名称冲突。</li>
+<li>包也限定了访问权限，拥有包访问权限的类才能访问某个包中的类。</li>
+</ol>
+<p>&lt;&lt;&lt;END</p>
+<h2 id="Java-类的导入"><a href="#Java-类的导入" class="headerlink" title="Java 类的导入"></a>Java 类的导入</h2><p>一个类可以使用所属包中所有的类，以及其他包中的公有类（public class）。使用 import 语句可以导入一个类，并且，一旦使用了 import 语句，在使用指定类时，就不必写出包的全名了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 未使用 import 语句之前</span></span><br><span class="line">java.util.Date now = <span class="keyword">new</span> java.util.Date();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用 import 方式导入类</span></span><br><span class="line"><span class="keyword">import</span> java.util.Date;</span><br><span class="line"></span><br><span class="line">Date now = <span class="keyword">new</span> Date();</span><br></pre></td></tr></table></figure>
+
+
+
+<p>可以使用 import 语句导入一个特定的类或者整个包：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br></pre></td></tr></table></figure>
+
+<p>但是需要注意的是，只能使用星号（*）导入一个包，而不能使用 import java.* 或 import java.*.* 导入以 java 为前缀的所有包。</p>
+<p>import 语句不仅可以导入类，还增加了导入静态方法和静态域的功能，比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> java.lang.System.*;</span><br><span class="line"></span><br><span class="line">out.println(<span class="string">&quot;Hello world&quot;</span>); <span class="comment">// 等同于 System.out.println</span></span><br><span class="line">exit(<span class="number">0</span>); <span class="comment">// 等同于 System.exit</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Package-的作用域"><a href="#Package-的作用域" class="headerlink" title="Package 的作用域"></a>Package 的作用域</h2><p>我们都知道 ，Java 一共提供了 3 个访问控制修饰符，private、protected 和 public，分别代表了三种访问控制级别。另外还有一个不加任何访问控制修饰符的默认级别，称为 friendly。</p>
+<p>访问控制修饰符的权限如下表：</p>
+<p>&lt;&lt;&lt;CUSTOM</p>
+<table>
+<thead>
+<tr>
+<th align="center"><strong>访问作用域</strong></th>
+<th align="center"><strong>private</strong></th>
+<th align="center"><strong>friendly</strong></th>
+<th align="center"><strong>protected</strong></th>
+<th align="center"><strong>public</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">当前类</td>
+<td align="center">√</td>
+<td align="center">√</td>
+<td align="center">√</td>
+<td align="center">√</td>
+</tr>
+<tr>
+<td align="center">同包中的其他类</td>
+<td align="center">×</td>
+<td align="center">√</td>
+<td align="center">√</td>
+<td align="center">√</td>
+</tr>
+<tr>
+<td align="center">不同包的其他类</td>
+<td align="center">×</td>
+<td align="center">×</td>
+<td align="center">×</td>
+<td align="center">√</td>
+</tr>
+<tr>
+<td align="center">同包中的子类</td>
+<td align="center">×</td>
+<td align="center">√</td>
+<td align="center">√</td>
+<td align="center">√</td>
+</tr>
+<tr>
+<td align="center">不同包的子类</td>
+<td align="center">×</td>
+<td align="center">×</td>
+<td align="center">√</td>
+<td align="center">√</td>
+</tr>
+</tbody></table>
+<ul>
+<li>public：表示开放，数据成员和方法是对所有用户开放的，所有用户都可以直接进行访问；</li>
+<li>protected：表示保护，只有当前类，以及自己的子类、朋友可以访问，其他人不可以访问；</li>
+<li>friendly：包作用域，没有添加任何访问控制修饰符；</li>
+<li>private：表示私有，私有的意思就是除了当前类之外，任何人（包括子类）都不可以直接访问。</li>
+</ul>
+<p>&lt;&lt;&lt;END</p>
+<p>注意：<red><em>包作用域是指一个类允许访问同一个包中没有 public、private 修饰的 class，以及没有 public、protected、private 修饰的字段和方法。</em></red></p>
+<h2 id="Package-的命名规则"><a href="#Package-的命名规则" class="headerlink" title="Package 的命名规则"></a>Package 的命名规则</h2><blockquote>
+<p>以 java.* 开头的是Java的核心包，所有程序都会使用这些包中的类； </p>
+<p>以 javax.* 开头的是扩展包，x 是 extension 的意思，也就是扩展。虽然 javax.* 是对 java.* 的优化和扩展，但是由于 javax.* 使用的越来越多，很多程序都依赖于 javax.，所以 javax. 也是核心的一部分了，也随 JDK 一起发布。 </p>
+<p>以 org.* 开头的是各个机构或组织发布的包，因为这些组织很有影响力，它们的代码质量很高，所以也将它们开发的部分常用的类随 JDK 一起发布。 在包的命名方面，为了防止重名，有一个惯例：大家都以自己域名的倒写形式作为开头来为自己开发的包命名，例如百度发布的包会以 com.baidu.* 开头，w3c组织发布的包会以 org.w3c.* 开头，微学苑发布的包会以 net.weixueyuan.* 开头…… 组织机构的域名后缀一般为 org，公司的域名后缀一般为 com，可以认为 org.* 开头的包为非盈利组织机构发布的包，它们一般是开源的，可以免费使用在自己的产品中，不用考虑侵权问题，而以 com.* 开头的包往往由盈利性的公司发布，可能会有版权问题，使用时要注意。</p>
+</blockquote>
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">pf #_</span></span>
+                <time datetime="2021-01-04T02:50:31.000Z" data-updated="true">Mon Jan 04 2021</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/Java/">Java</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+</div>
+
+            <p class="meta">
+                
+
+                
+                <a class="basic-alignment right" href="/" title="Previous Post: Java 枚举（Enum）类型详解">Java 枚举（Enum）类型详解 »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/01/04/Java-Package-%E8%AF%A6%E8%A7%A3/">Java Package 详解</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/28/%E6%9E%9A%E4%B8%BE%EF%BC%88Enum%EF%BC%89%E8%AF%A6%E8%A7%A3/">Java 枚举（Enum）类型详解</a></li></ul>
+</section>
+
+<section class="even">
+    <h1>Featured posts</h1>
+    <ul>
+        
+    </ul>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2021 - pf #_ -
+        <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
+    </p>
+</footer>
+
+
+    <!-- scripts list from theme config.yml -->
+    
+        <script src="/js/optimize.js"></script>
+    
+
+
+</body>
+</html>

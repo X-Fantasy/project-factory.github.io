@@ -1,3 +1,17 @@
+/* 全局共享样式 */
+.red {
+    color: #d14e4e;
+}
+
+/* 修改主题的配色 */
+article h1, article h2, article h3 {
+    color: #d14e4e;
+}
+
+.sidebar h1, .sidebar h2 {
+    color: #d14e4e;
+}
+
 /* 自定义样式标识 */
 .custom {
 }
@@ -11,6 +25,14 @@
 .custom ul {
     box-sizing: border-box;
     padding-left: 1em;
+}
+
+.custom ul li::marker, .custom ol li::marker {
+    color: #d14e4e;
+}
+
+.custom ol li, .custom ul li {
+    margin-bottom: 0.75em;
 }
 
 
@@ -31,15 +53,10 @@
     padding: 0 10px;
     font-size: 14px;
     min-width: 100px;
-    max-width: 100%;
 }
 
 .custom table th {
     font-size: 16px;
     background-color: #efefef;
     white-space: nowrap;
-}
-
-.custom table td:last-child {
-    width: 100%;
 }
