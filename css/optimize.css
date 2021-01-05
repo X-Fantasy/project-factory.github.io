@@ -1,6 +1,6 @@
 /* 全局共享样式 */
 .red {
-    color: #d14e4e;
+    color: #d14e4e !important;
 }
 
 /* 修改主题的配色 */

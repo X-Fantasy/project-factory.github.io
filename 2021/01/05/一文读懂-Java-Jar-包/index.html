@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="zh-CN"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="zh-CN"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="zh-CN"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>一文读懂 Java Jar 包</title>
+
+    <meta name="author" content="pf #_">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="https://laravel.design/2021/01/05/一文读懂-Java-Jar-包/">
+
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+        <!-- stylesheets list from config.yml -->
+        
+            <link rel="stylesheet" href="/css/optimize.css">
+        
+    
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">PF #<b id="pf_">_</b></a></h1>
+        
+            <h2>The Art of software design</h2>
+        
+    </hgroup>
+</header>
+
+<!-- 输入提示符闪烁 -->
+<script>
+    let _dom = $('#pf_');
+    let hideFn = function () {
+        _dom.hide();
+    };
+    setInterval(function () {
+        _dom.show();
+        setTimeout(hideFn, 1000);
+    }, 2000);
+</script>
+
+<nav role="navigation">
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:https://laravel.design/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">一文读懂 Java Jar 包</h1>
+            <p class="meta">
+                <time datetime="2021-01-05T06:13:07.000Z" data-updated="true">Tue Jan 05 2021</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <p>在将 Java 应用程序进行打包时，你的软件使用者一定希望你仅提供给他一个单独的可执行文件，而不是一个含有大量类文件的目录。而 Java 归档（JAR）文件就是为此目的而设计的，一个 JAR 文件既可以包含类文件，也可以包含诸如图像和声音这些其它类型的文件。此外，JAR 文件是压缩的，它使用了大家熟悉的 ZIP 压缩格式。</p>
+<p>然而在实际的项目开发过程中，我们通常会使用 maven 等项目管理工具来自动地管理 Jar 包及相关的依赖，这也导致有些小伙伴对 Jar 文件的运行原理一知半解，今天就让我们以原生指令的方式去探索 Jar 包的奥秘，希望大家学习完本篇文章后，可以对 Jar 文件有全新的认识。</p>
+<h2 id="什么是-Jar-包"><a href="#什么是-Jar-包" class="headerlink" title="什么是 Jar 包"></a>什么是 Jar 包</h2><p>Jar 包就是 Java Archive File，顾名思义，它是 Java 的一种文档格式，用于将许多文件聚合到一个文件中。JAR 文件本质上是一个 ZIP 文件，其中包含了一个可选的名为 META-INF 的特殊目录。注意，网上一些文章中说 META-INF 目录是必选的，其实并不是这样的，这点需要注意一下。</p>
+<p>可以通过命令行 <red>jar</red> 工具或在 Java 平台中使用 <red>java.util.jar</red> API 来创建 JAR 文件。对于 JAR 文件的名称没有限制，它可以是特定平台上的任何合法文件名。</p>
+<p>在许多情况下，JAR 文件并不仅仅是 Java 类文件或资源文件的简单存档。它们经常会被用作于应用程序的扩展。如果 Jar 包中存在 META-INF 目录，还可以在其中存储 Jar 包的配置信息，包括安全性，版本控制，启动配置信息和 SPI 服务等信息，这个会在后面的展开内容中详细讲解。</p>
+<p>Jar 大体上上可以分为两种：</p>
+<p>&lt;&lt;&lt;CUSTOM</p>
+<ul>
+<li>非可执行 JAR：作为依赖库在宿主项目中使用，但是不能通过 java -jar 命令直接执行。</li>
+<li>可执行 JAR：可以通过 java -jar 命令直接运行程序，也可作为依赖库使用。</li>
+</ul>
+<p>&lt;&lt;&lt;END</p>
+<h2 id="查看-Jar-文件信息"><a href="#查看-Jar-文件信息" class="headerlink" title="查看 Jar 文件信息"></a>查看 Jar 文件信息</h2><p>使用如下命令格式，可以查看一个 .jar 文件的内容结构：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jar -t[vf] filename</span><br></pre></td></tr></table></figure>
+
+<p>filename 代表我们要查看的 jar 文件的名称，比如查看 servlet 官方 jar 文件的信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\PF&gt;jar -tf javax.servlet-api-4.0.1.jar</span><br><span class="line">META-INF/</span><br><span class="line">META-INF/MANIFEST.MF</span><br><span class="line">javax/</span><br><span class="line">javax/servlet/</span><br><span class="line">javax/servlet/http/</span><br><span class="line">javax/servlet/annotation/</span><br><span class="line">javax/servlet/descriptor/</span><br><span class="line">META-INF/LICENSE.txt</span><br><span class="line">javax/servlet/ServletRequestEvent.class</span><br><span class="line">javax/servlet/Registration.class</span><br><span class="line">javax/servlet/LocalStrings.properties</span><br><span class="line">javax/servlet/MultipartConfigElement.class</span><br><span class="line">javax/servlet/SingleThreadModel.class</span><br><span class="line">javax/servlet/AsyncContext.class</span><br><span class="line">javax/servlet/FilterRegistration<span class="variable">$Dynamic</span>.class</span><br><span class="line">javax/servlet/DispatcherType.class</span><br><span class="line">javax/servlet/GenericFilter.class</span><br><span class="line">javax/servlet/GenericServlet.class</span><br><span class="line">javax/servlet/ServletOutputStream.class</span><br><span class="line">javax/servlet/HttpMethodConstraintElement.class</span><br><span class="line">javax/servlet/ServletInputStream.class</span><br><span class="line">javax/servlet/FilterConfig.class</span><br><span class="line">javax/servlet/ServletRequestAttributeEvent.class</span><br><span class="line">javax/servlet/http/HttpServletResponseWrapper.class</span><br><span class="line">javax/servlet/http/HttpServletRequestWrapper.class</span><br><span class="line">javax/servlet/http/LocalStrings.properties</span><br><span class="line">javax/servlet/http/NoBodyResponse.class</span><br><span class="line">javax/servlet/http/HttpFilter.class</span><br><span class="line">javax/servlet/http/WebConnection.class</span><br><span class="line">javax/servlet/http/HttpServletMapping.class</span><br><span class="line">javax/servlet/http/HttpSessionBindingListener.class</span><br><span class="line">javax/servlet/http/HttpSessionContext.class</span><br><span class="line">javax/servlet/http/package.html</span><br><span class="line">javax/servlet/http/HttpServlet.class</span><br><span class="line">javax/servlet/http/HttpServletRequest.class</span><br><span class="line">javax/servlet/http/HttpServletRequest<span class="variable">$1</span>.class</span><br><span class="line">javax/servlet/http/PushBuilder.class</span><br><span class="line">javax/servlet/http/LocalStrings_es.properties</span><br><span class="line">javax/servlet/http/Cookie.class</span><br><span class="line">javax/servlet/http/LocalStrings_ja.properties</span><br><span class="line">javax/servlet/http/Part.class</span><br><span class="line">javax/servlet/http/HttpSessionListener.class</span><br><span class="line">javax/servlet/http/HttpSessionBindingEvent.class</span><br><span class="line">javax/servlet/http/HttpServletResponse.class</span><br><span class="line">javax/servlet/http/HttpSessionEvent.class</span><br><span class="line">javax/servlet/http/HttpUpgradeHandler.class</span><br><span class="line">javax/servlet/http/HttpSessionIdListener.class</span><br><span class="line">javax/servlet/http/HttpSessionActivationListener.class</span><br><span class="line">javax/servlet/http/MappingMatch.class</span><br><span class="line">javax/servlet/http/HttpUtils.class</span><br><span class="line">javax/servlet/http/HttpSession.class</span><br><span class="line">javax/servlet/http/LocalStrings_fr.properties</span><br><span class="line">javax/servlet/http/HttpSessionAttributeListener.class</span><br><span class="line">javax/servlet/http/NoBodyOutputStream.class</span><br><span class="line">javax/servlet/Filter.class</span><br><span class="line">javax/servlet/ServletConfig.class</span><br><span class="line">javax/servlet/ServletContextEvent.class</span><br><span class="line">javax/servlet/UnavailableException.class</span><br><span class="line">javax/servlet/ServletRegistration<span class="variable">$Dynamic</span>.class</span><br><span class="line">javax/servlet/package.html</span><br><span class="line">javax/servlet/RequestDispatcher.class</span><br><span class="line">javax/servlet/ServletRequestWrapper.class</span><br><span class="line">javax/servlet/Servlet.class</span><br><span class="line">javax/servlet/FilterChain.class</span><br><span class="line">javax/servlet/annotation/MultipartConfig.class</span><br><span class="line">javax/servlet/annotation/WebListener.class</span><br><span class="line">javax/servlet/annotation/WebFilter.class</span><br><span class="line">javax/servlet/annotation/HttpConstraint.class</span><br><span class="line">javax/servlet/annotation/package.html</span><br><span class="line">javax/servlet/annotation/WebInitParam.class</span><br><span class="line">javax/servlet/annotation/ServletSecurity<span class="variable">$EmptyRoleSemantic</span>.class</span><br><span class="line">javax/servlet/annotation/WebServlet.class</span><br><span class="line">javax/servlet/annotation/ServletSecurity<span class="variable">$TransportGuarantee</span>.class</span><br><span class="line">javax/servlet/annotation/HttpMethodConstraint.class</span><br><span class="line">javax/servlet/annotation/ServletSecurity.class</span><br><span class="line">javax/servlet/annotation/HandlesTypes.class</span><br><span class="line">javax/servlet/ServletResponseWrapper.class</span><br><span class="line">javax/servlet/ServletSecurityElement.class</span><br><span class="line">javax/servlet/LocalStrings_ja.properties</span><br><span class="line">javax/servlet/ServletContextListener.class</span><br><span class="line">javax/servlet/ServletRequestAttributeListener.class</span><br><span class="line">javax/servlet/ServletException.class</span><br><span class="line">javax/servlet/AsyncListener.class</span><br><span class="line">javax/servlet/descriptor/TaglibDescriptor.class</span><br><span class="line">javax/servlet/descriptor/package.html</span><br><span class="line">javax/servlet/descriptor/JspPropertyGroupDescriptor.class</span><br><span class="line">javax/servlet/descriptor/JspConfigDescriptor.class</span><br><span class="line">javax/servlet/ServletContext.class</span><br><span class="line">javax/servlet/SessionCookieConfig.class</span><br><span class="line">javax/servlet/ServletRequestListener.class</span><br><span class="line">javax/servlet/ServletResponse.class</span><br><span class="line">javax/servlet/SessionTrackingMode.class</span><br><span class="line">javax/servlet/HttpConstraintElement.class</span><br><span class="line">javax/servlet/FilterRegistration.class</span><br><span class="line">javax/servlet/Registration<span class="variable">$Dynamic</span>.class</span><br><span class="line">javax/servlet/WriteListener.class</span><br><span class="line">javax/servlet/AsyncEvent.class</span><br><span class="line">javax/servlet/ServletContextAttributeEvent.class</span><br><span class="line">javax/servlet/ReadListener.class</span><br><span class="line">javax/servlet/ServletContainerInitializer.class</span><br><span class="line">javax/servlet/ServletRegistration.class</span><br><span class="line">javax/servlet/LocalStrings_fr.properties</span><br><span class="line">javax/servlet/ServletContextAttributeListener.class</span><br><span class="line">javax/servlet/ServletRequest.class</span><br><span class="line">META-INF/maven/</span><br><span class="line">META-INF/maven/javax.servlet/</span><br><span class="line">META-INF/maven/javax.servlet/javax.servlet-api/</span><br><span class="line">META-INF/maven/javax.servlet/javax.servlet-api/pom.xml</span><br><span class="line">META-INF/maven/javax.servlet/javax.servlet-api/pom.properties</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，除了 .class 文件以外，jar 还能打包静态资源文件，比如 .xml、.properties、.html 等项目所需的所有文件。</p>
+<h2 id="MANIFEST-MF-文件"><a href="#MANIFEST-MF-文件" class="headerlink" title="MANIFEST.MF 文件"></a>MANIFEST.MF 文件</h2><p>从上面的命令执行结果中可以看到，除了类文件、图像和其他资源外，每个 Jar 文件还包含了一个用于描述归档信息的清单文件 <red>MANIFEST.MF</red>。</p>
+<p>清单文件的名称固定为 <red>MANIFEST.MF</red>，它位于 Jar 文件的一个特殊 <red>META-INF</red> 子目录中。最小的符合标准的清单文件是很简单的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Manifest-Version: 1.0</span><br></pre></td></tr></table></figure>
+
+<p>复杂的清单文件会包含更多的属性条目，这些清单条目被分成多个节。第一节被称为主节（main section），它作用于整个 JAR 文件。随后的条目用来指定已命名条目的属性，这些已命名的条目可以是某个文件、包或者 URL。它们都必须起始于名为 Name 的条目，节与节之间用空行分开。</p>
+<h4 id="一般属性"><a href="#一般属性" class="headerlink" title="一般属性"></a>一般属性</h4><p>&lt;&lt;&lt;CUSTOM</p>
+<ul>
+<li>Manifest-Version：定义清单文件的版本。该值是合法的版本号，例如：Manifest-Version: 1.0。</li>
+<li>Created-By：声明该文件的生成者，一般该属性是由 jar 命令行工具自动生成的，例如：Created-By: Maven Jar Plugin 3.2.0。</li>
+<li>Signature-Version：定义 jar 文件的签名版本，该值应该是有效的版本号字符串。</li>
+<li>Class-Path：此属性的值指定此应用程序所需依赖库的相对路径，如果有多个依赖库，路径之间用一个或多个空格分隔，此应用程序的类加载器会使用此属性的值，来构造依赖库的搜索路径。</li>
+</ul>
+<p>这里重点介绍一下 <red>Class-Path</red> 属性，在我们开发 Jar 包应用的时候，往往还会依赖其它的 .jar 文件。这时，打包当前应用为 .jar 文件时，就需要考虑当前应用与第三方 .jar 文件的依赖关系。否则我们打包的 jar 就无法独立运行。而 <red>Class-Path</red> 属性就是用来解决依赖的 .jar 文件路径问题的。</p>
+<p>例如：</p>
+<p>&lt;&lt;&lt;END</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Class-Path: .&#x2F;lib&#x2F;mysql-connector-java-8.0.22.jar .&#x2F;lib&#x2F;util.jar</span><br></pre></td></tr></table></figure>
+
+<p>代表当前 jar 文件依赖同目录下的 lib/mysql-connector-java-8.0.22.jar 和 lib/util.jar 文件，如果这两个 jar 文件不存在，可能会导致 java.lang.ClassNotFoundException 异常。</p>
+<p>注意：<red><em>Class-Path 指定的是外部依赖文件路径，而不是 Jar 包内的路径。</em></red></p>
+<h4 id="应用程序相关属性"><a href="#应用程序相关属性" class="headerlink" title="应用程序相关属性"></a>应用程序相关属性</h4><p>&lt;&lt;&lt;CUSTOM</p>
+<ul>
+<li>Main-Class：定义 jar 文件的入口类，该类必须是一个可执行的类，一旦定义了该属性即可通过 java -jar x.jar 来直接运行该 jar 文件。</li>
+</ul>
+<p>&lt;&lt;&lt;END</p>
+<h4 id="包扩展属性"><a href="#包扩展属性" class="headerlink" title="包扩展属性"></a>包扩展属性</h4><p>&lt;&lt;&lt;CUSTOM</p>
+<ul>
+<li><p>Implementation-Title：定义了扩展实现的标题</p>
+</li>
+<li><p>Implementation-Version：定义扩展实现的版本</p>
+</li>
+<li><p>Implementation-Vendor：定义扩展实现的组织</p>
+</li>
+<li><p>Implementation-Vendor-Id：定义扩展实现的组织的标识</p>
+</li>
+<li><p>Implementation-URL：定义该扩展包的下载地址(URL)</p>
+</li>
+<li><p>Specification-Title：定义扩展规范的标题</p>
+</li>
+<li><p>Specification-Version：定义扩展规范的版本</p>
+</li>
+<li><p>Specification-Vendor：声明了维护该规范的组织</p>
+</li>
+<li><p>Sealed：定义jar文件是否封存，值可以是true或者false</p>
+</li>
+</ul>
+<p>&lt;&lt;&lt;END</p>
+<h4 id="自定义属性"><a href="#自定义属性" class="headerlink" title="自定义属性"></a>自定义属性</h4><p>除了前面提到的一些属性外，你也可以在 MANIFEST.MF 中增加自己的属性以及响应的值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Spring-Boot-Version: 2.4.0</span><br><span class="line">Spring-Boot-Classes: BOOT-INF&#x2F;classes&#x2F;</span><br><span class="line">Spring-Boot-Lib: BOOT-INF&#x2F;lib&#x2F;</span><br><span class="line">Spring-Boot-Classpath-Index: BOOT-INF&#x2F;classpath.idx</span><br><span class="line">Spring-Boot-Layers-Index: BOOT-INF&#x2F;layers.idx</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="读取-MANIFEST-MF-信息"><a href="#读取-MANIFEST-MF-信息" class="headerlink" title="读取 MANIFEST.MF 信息"></a>读取 MANIFEST.MF 信息</h2><p>JDK 中提供了可以直接读取 MANIFEST.MF 文件信息的工具，可以通过 <red>java.util.jar</red> 这个类库来读取。下面的代码展示了如何读取 servlet 官方 jar 包信息：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    JarFile jar = <span class="keyword">new</span> JarFile(<span class="keyword">new</span> File(<span class="string">&quot;C:\\Users\\Pf\\Downloads\\javax.servlet-api-4.0.1.jar&quot;</span>));</span><br><span class="line">    Manifest manifest = jar.getManifest();</span><br><span class="line">    </span><br><span class="line">    Attributes mainAttributes = manifest.getMainAttributes();</span><br><span class="line">    <span class="keyword">for</span>(Map.Entry&lt;Object, Object&gt; attrEntry : mainAttributes.entrySet())&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;main\t&quot;</span>+attrEntry.getKey()+<span class="string">&quot;: &quot;</span>+attrEntry.getValue());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    Map&lt;String, Attributes&gt; entries = manifest.getEntries();</span><br><span class="line">    <span class="keyword">for</span>(Map.Entry&lt;String, Attributes&gt; entry : entries.entrySet()) &#123;</span><br><span class="line">        Attributes values = entry.getValue();</span><br><span class="line">        <span class="keyword">for</span> (Map.Entry&lt;Object, Object&gt; attrEntry : values.entrySet()) &#123;</span><br><span class="line">            System.out.println(attrEntry.getKey() + <span class="string">&quot;: &quot;</span> + attrEntry.getValue());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出执行结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">main	Manifest-Version: 1.0</span><br><span class="line">main	Bundle-Description: Java(TM) Servlet 4.0 API Design Specification</span><br><span class="line">main	Bundle-License: https:&#x2F;&#x2F;oss.oracle.com&#x2F;licenses&#x2F;CDDL+GPL-1.1</span><br><span class="line">main	Bundle-SymbolicName: javax.servlet-api</span><br><span class="line">main	Implementation-Version: 4.0.1</span><br><span class="line">main	Archiver-Version: Plexus Archiver</span><br><span class="line">main	Built-By: vinay</span><br><span class="line">main	Bundle-ManifestVersion: 2</span><br><span class="line">main	Bnd-LastModified: 1524208739354</span><br><span class="line">main	Specification-Vendor: Oracle Corporation</span><br><span class="line">main	Implementation-Vendor-Id: org.glassfish</span><br><span class="line">main	Bundle-DocURL: https:&#x2F;&#x2F;javaee.github.io</span><br><span class="line">main	Bundle-Vendor: GlassFish Community</span><br><span class="line">main	Import-Package: javax.servlet;version&#x3D;&quot;4.0.0&quot;,javax.servlet.annotation;version&#x3D;&quot;4.0.0&quot;,javax.servlet.descriptor;version&#x3D;&quot;4.0.0&quot;,javax.servlet.http;version&#x3D;&quot;4.0.0&quot;</span><br><span class="line">main	Tool: Bnd-0.0.255</span><br><span class="line">main	Implementation-Vendor: GlassFish Community</span><br><span class="line">main	Export-Package: javax.servlet;uses:&#x3D;&quot;javax.servlet.annotation,javax.servlet.descriptor&quot;;version&#x3D;&quot;4.0.0&quot;,javax.servlet.annotation;uses:&#x3D;&quot;javax.servlet&quot;;version&#x3D;&quot;4.0.0&quot;,javax.servlet.http;uses:&#x3D;&quot;javax.servlet&quot;;version&#x3D;&quot;4.0.0&quot;,javax.servlet.descriptor;version&#x3D;&quot;4.0.0&quot;</span><br><span class="line">main	Bundle-Version: 4.0.0</span><br><span class="line">main	Bundle-Name: Java Servlet API</span><br><span class="line">main	Extension-Name: javax.servlet</span><br><span class="line">main	Created-By: 1.8.0_131 (Oracle Corporation)</span><br><span class="line">main	Build-Jdk: 1.8.0_131</span><br><span class="line">main	Specification-Version: 4.0</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="META-INF-目录"><a href="#META-INF-目录" class="headerlink" title="META-INF 目录"></a>META-INF 目录</h2><p>大多数 JAR 文件包含一个 <red>META-INF</red> 目录，它用于存储 JAR 包和扩展的配置数据，如安全性和版本信息。Java 2 平台（标准版【J2SE】）识别并解释 META-INF 目录中的下述文件和目录，以便配置应用程序、扩展和类装载器：</p>
+<p>&lt;&lt;&lt;CUSTOM</p>
+<ul>
+<li>MANIFEST.MF：这个清单文件前面已经详细介绍过。</li>
+<li>services 目录：此目录下存储所有 <red>SPI</red> 服务配置文件，SPI 全称为 Service Provider Interface，是 JDK 内置的一种服务提供发现机制。</li>
+<li>INDEX.LIST：这个文件由 jar 工具的新选项 <code>-i</code> 自动生成。从1.3 开始，引入 JarIndex 来优化网络应用程序（尤其是小应用程序）的类加载器的类搜索过程。一旦类加载器在特定的 jar 文件中找到<code>INDEX.LIST</code> 文件，它就始终信任其中列出的信息。如果找到特定类的映射，但类加载器无法通过跟踪链接找到它，则抛出 InvalidJarIndexException。发生这种情况时，应用程序开发人员应在扩展名上重新运行 jar 工具，以将正确的信息获取到索引文件中。</li>
+<li>.SF：这是 JAR 文件的签名文件</li>
+<li>.DSA：与签名文件相关联的签名程序块文件，它存储了用于签名 JAR 文件的公共签名。</li>
+<li>LICENSE：版权信息</li>
+</ul>
+<p>&lt;&lt;&lt;END</p>
+<h2 id="创建-Jar-文件"><a href="#创建-Jar-文件" class="headerlink" title="创建 Jar 文件"></a>创建 Jar 文件</h2><p>上面已经基本介绍完了 Jar 包的相关概念和文件组织结构信息，如果我们要手工打包一个 .jar 文件，可以使用 JDK 提供的 <red>jar</red> 命令行工具来完成。</p>
+<p>具体用法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">主操作模式:</span><br><span class="line"></span><br><span class="line"> -c, --create               创建档案</span><br><span class="line"> -i, --generate-index&#x3D;FILE  为指定的 jar 档案生成</span><br><span class="line">                            索引信息</span><br><span class="line"> -t, --list                 列出档案的目录</span><br><span class="line"> -u, --update               更新现有 jar 档案</span><br><span class="line"> -x, --extract              从档案中提取指定的 (或全部) 文件</span><br><span class="line"> -d, --describe-module      输出模块描述符或自动模块名称</span><br><span class="line"></span><br><span class="line">在任意模式下有效的操作修饰符:</span><br><span class="line"></span><br><span class="line"> -C DIR                     更改为指定的目录并包含</span><br><span class="line">                            以下文件</span><br><span class="line"> -f, --file&#x3D;FILE            档案文件名。省略时, 基于操作</span><br><span class="line">                            使用 stdin 或 stdout</span><br><span class="line">     --release VERSION      将下面的所有文件都放在</span><br><span class="line">                            jar 的版本化目录中 (即 META-INF&#x2F;versions&#x2F;VERSION&#x2F;)</span><br><span class="line"> -v, --verbose              在标准输出中生成详细输出</span><br><span class="line"></span><br><span class="line">在创建和更新模式下有效的操作修饰符:</span><br><span class="line"></span><br><span class="line"> -e, --main-class&#x3D;CLASSNAME 捆绑到模块化或可执行</span><br><span class="line">                            jar 档案的独立应用程序</span><br><span class="line">                            的应用程序入口点</span><br><span class="line"> -m, --manifest&#x3D;FILE        包含指定清单文件中的</span><br><span class="line">                            清单信息</span><br><span class="line"> -M, --no-manifest          不为条目创建清单文件</span><br><span class="line">     --module-version&#x3D;VERSION    创建模块化 jar 或更新</span><br><span class="line">                            非模块化 jar 时的模块版本</span><br><span class="line">     --hash-modules&#x3D;PATTERN 计算和记录模块的散列,</span><br><span class="line">                            这些模块按指定模式匹配并直接或</span><br><span class="line">                            间接依赖于所创建的模块化 jar 或</span><br><span class="line">                            所更新的非模块化 jar</span><br><span class="line"> -p, --module-path          模块被依赖对象的位置, 用于生成</span><br><span class="line">                            散列</span><br><span class="line"></span><br><span class="line">只在创建, 更新和生成索引模式下有效的操作修饰符:</span><br><span class="line"></span><br><span class="line"> -0, --no-compress          仅存储; 不使用 ZIP 压缩</span><br><span class="line"></span><br><span class="line">其他选项:</span><br><span class="line"></span><br><span class="line"> -?, -h, --help[:compat]    提供此帮助，也可以选择性地提供兼容性帮助</span><br><span class="line">     --help-extra           提供额外选项的帮助</span><br><span class="line">     --version              输出程序版本</span><br></pre></td></tr></table></figure>
+
+<p>我们先创建一个 Java 项目，编写一个非常简单的类 MainClass.java，整个项目结构如下图：</p>
+<img src="/2021/01/05/%E4%B8%80%E6%96%87%E8%AF%BB%E6%87%82-Java-Jar-%E5%8C%85/1.png" class="">
+
+<p>MainClass.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> design.laravel;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainClass</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;hello laravel.design&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>META-INF/MANIFEST.MF</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Manifest-Version: 1.0</span><br><span class="line">Main-Class: design.laravel.MainClass</span><br></pre></td></tr></table></figure>
+
+<p>切换至 src 目录下，执行打包命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">jar -cvfm study.jar META-INF/MANIFEST.MF design/laravel/MainClass.class</span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">已添加清单</span><br><span class="line">正在添加: design/laravel/MainClass.class(输入 = 447) (输出 = 302)(压缩了 32%)</span><br></pre></td></tr></table></figure>
+
+<p>打包命令执行成功，会在 src 目录下生成一个 study.jar 文件，因为我们在 MANIFEST.MF 里面设置了 Mani-Class 属性，所以我们可以直接通过 java -jar 命令执行 jar 包：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">java -jar study.jar</span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">hello laravel.design</span><br></pre></td></tr></table></figure>
+
+<p>用 jar 命令查看我们打包好的 study.jar 文件结构：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">jar -tf study.jar</span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">META-INF/</span><br><span class="line">META-INF/MANIFEST.MF</span><br><span class="line">design/laravel/MainClass.class</span><br></pre></td></tr></table></figure>
+
+<p>有关于 jar 命令更多的高级用法，请查看<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/tools/windows/jar.html">官方帮助文档</a> 。</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/guides/jar/jar.html">https://docs.oracle.com/javase/8/docs/technotes/guides/jar/jar.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/tools/windows/jar.html">https://docs.oracle.com/javase/8/docs/technotes/tools/windows/jar.html</a></p>
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">pf #_</span></span>
+                <time datetime="2021-01-05T06:13:07.000Z" data-updated="true">Tue Jan 05 2021</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/Java/">Java</a>,
+    
+        <a class="category" href="/tags/Jar/">Jar</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+</div>
+
+            <p class="meta">
+                
+
+                
+                <a class="basic-alignment right" href="/" title="Previous Post: Java Package 详解">Java Package 详解 »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/01/05/%E4%B8%80%E6%96%87%E8%AF%BB%E6%87%82-Java-Jar-%E5%8C%85/">一文读懂 Java Jar 包</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/04/Java-Package-%E8%AF%A6%E8%A7%A3/">Java Package 详解</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/28/%E6%9E%9A%E4%B8%BE%EF%BC%88Enum%EF%BC%89%E8%AF%A6%E8%A7%A3/">Java 枚举（Enum）类型详解</a></li></ul>
+</section>
+
+<section class="even">
+    <h1>Featured posts</h1>
+    <ul>
+        
+    </ul>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2021 - pf #_ -
+        <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
+    </p>
+</footer>
+
+
+    <!-- scripts list from theme config.yml -->
+    
+        <script src="/js/optimize.js"></script>
+    
+
+
+</body>
+</html>
