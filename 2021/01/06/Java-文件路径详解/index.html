@@ -1,0 +1,225 @@
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7" lang="zh-CN"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8" lang="zh-CN"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="zh-CN"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>Java 文件路径详解</title>
+
+    <meta name="author" content="pf #_">
+
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1">
+
+    <link rel="canonical" href="https://laravel.design/2021/01/06/Java-文件路径详解/">
+
+    
+
+    
+
+    
+<script src="/js/modernizr-2.0.js"></script>
+
+
+    
+<script src="/js/jquery-1.9.1.js"></script>
+
+
+    
+
+    
+<script src="/js/octo.js"></script>
+
+
+    
+<link rel="stylesheet" href="/css/octo.css">
+
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet"
+          type="text/css">
+
+    
+        <!-- stylesheets list from config.yml -->
+        
+            <link rel="stylesheet" href="/css/optimize.css">
+        
+    
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+<body>
+
+<header role="banner">
+    <hgroup>
+        <h1><a href="/">PF #<b id="pf_">_</b></a></h1>
+        
+            <h2>The Art of software design</h2>
+        
+    </hgroup>
+</header>
+
+<!-- 输入提示符闪烁 -->
+<script>
+    let _dom = $('#pf_');
+    let hideFn = function () {
+        _dom.hide();
+    };
+    setInterval(function () {
+        _dom.show();
+        setTimeout(hideFn, 1000);
+    }, 2000);
+</script>
+
+<nav role="navigation">
+    
+
+    <form action="https://google.com/search" method="get">
+        <fieldset role="search">
+            <input type="hidden" name="q" value="site:https://laravel.design/">
+            <input class="search" type="text" name="q" results="0" placeholder="Search">
+        </fieldset>
+    </form>
+
+    <ul class="main-navigation">
+        
+            <li><a href="/">Blog</a></li>
+        
+            <li><a href="/archives">Archives</a></li>
+        
+    </ul>
+</nav>
+
+
+<div id="main">
+    <div id="content">
+        <div>
+    <article class="hentry" role="article">
+        <header>
+            <h1 class="entry-title">Java 文件路径详解</h1>
+            <p class="meta">
+                <time datetime="2021-01-06T05:37:10.000Z" data-updated="true">Wed Jan 06 2021</time>
+            </p>
+        </header>
+        <div class="entry-content">
+            <p>刚接触 Java 的小伙伴，都学习过使用 <red>java.io.* </red> 类库操作磁盘文件。而操作文件时需要指定文件的路径，在 Java 中，文件路径分为两种：<red>绝对路径</red> 和 <red>相对路径</red>。</p>
+<p>绝对路径的概念：<red>文件在磁盘上真正存在的完整地址，通常是从盘符开始的路径。</red></p>
+<p>相对路径的概念：<red>相对路径指的是相对于 JVM 进程启动路径的路径。</red></p>
+<p>举个例子：假设有一个 Java 源文件 Example.java 在 D 盘根目录下，那么它的绝对路径地址就是 D:\Example.java。如果我们使用 javac Example.java 命令来编译此文件，然后在 D 盘根目录下再调用 java Example 来运行此文件，此时我们就启动了一个 jvm 进程，这个 jvm 进程是在 D 盘根目录下被启动的，所以此时 jvm 所加载的程序中 File 类的相对路径就是相对于这个路径的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Example</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        File file = <span class="keyword">new</span> File(<span class="string">&quot;hello.txt&quot;</span>);</span><br><span class="line">        file.createNewFile();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假设 jvm 是在 “D:\” 下启动的，那么 hello.txt 就会生成在 D:\hello.txt。</p>
+<p>假设 jvm 是在 “C:\” 下启动的，那么 hello.txt 就会生成在 C:\hello.txt。</p>
+<h2 id="user-dir"><a href="#user-dir" class="headerlink" title="user.dir"></a>user.dir</h2><p>JDK 官方文档对 user.dir 的解释：User’s current working directory.</p>
+<p>翻译过来就是 “<red>用户的当前工作目录</red>”，网上一些文章说 user.dir 代表的是 jvm 的启动路径，其实这种说法并不完全正确，在大多数情况下 user.dir 确实与 jvm 的启动路径相同。 我们可以通过 System.getProperty 静态方法获取 user.dir 的值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.getProperty(<span class="string">&quot;user.dir&quot;</span>); <span class="comment">// 返回值 D:\</span></span><br></pre></td></tr></table></figure>
+
+<p>但是，JDK 官方文档中也有说明 user.dir 是一个可配置的 jvm 启动参数，通过以下命令启动 Java 程序就可以修改 user.dir 的值：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Duser.dir=<span class="string">&quot;D:\demo&quot;</span> Example</span><br></pre></td></tr></table></figure>
+
+<p>然而，通过以上命令再次执行 Example 程序，会报 java.lang.ClassNotFoundException 错误，因为当前程序的工作目录已经被修改为 D:\demo 了，所以 jvm 进程也会去 D:\demo 目录下加载 Example 类：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">D:\&gt;java -Duser.dir=<span class="string">&quot;d:\\demo&quot;</span> Example</span><br><span class="line">错误: 找不到或无法加载主类 Example</span><br><span class="line">原因: java.lang.ClassNotFoundException: Example</span><br></pre></td></tr></table></figure>
+
+<p>如果我们把编译好的 Example.class 复制到 D:\demo 中，就可以执行成功。并且读取到的 user.dir 确实是我们修改后的目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">D:\&gt;java -Duser.dir=<span class="string">&quot;d:\\demo&quot;</span> Example</span><br><span class="line">user.dir: d:\\demo</span><br></pre></td></tr></table></figure>
+
+<p>注意看上面的执行命令，我们是在 D:\ 目录下执行的 java 命令，jvm 进程也在这里启动，虽然我们修改了 user.dir 启动参数，但是我们创建的 hello.txt 文件，依然被创建在了 D:\hello.txt，而不是我们以为的 D:\demo\hello.txt。</p>
+<p>还记得我们之前说的相对路径的概念吗，<red>相对路径指的是相对于 JVM 进程启动路径的路径</red>，user.dir 只是修改了用户的工作目录，所以这里可以证明 <red>user.dir ≠ jvm 启动路径</red>。也就是说不能把 user.dir 当做 jvm 的启动路径去理解和使用。 </p>
+<h2 id="java-io-File-类"><a href="#java-io-File-类" class="headerlink" title="java.io.File 类"></a>java.io.File 类</h2><p>JDK 官方文档中针对 File 类的相对路径有这么一段描述：</p>
+<blockquote>
+<p>A pathname, whether abstract or in string form, may be either <em>absolute</em> or <em>relative</em>. An absolute pathname is complete in that no other information is required in order to locate the file that it denotes. A relative pathname, in contrast, must be interpreted in terms of information taken from some other pathname. By default the classes in the <code>java.io</code> package always resolve relative pathnames against the current user directory. This directory is named by the system property <code>user.dir</code>, and is typically the directory in which the Java virtual machine was invoked.</p>
+</blockquote>
+<p>一个路径，无论是抽象的还是字符串形式的，都无非是绝对路径或相对路径。绝对路径是完整的，因为不需要再补充其它信息来定位它所指示的文件。相比之下，相对路径必须根据来自其它路径的信息来进行解释。<red>默认情况下，java.io 包总是根据用户的当前工作目录来解析相对路径。该路径由系统属性 user.dir 标识，通常它是调用 Java 虚拟机的目录。</red></p>
+<p>改写我们刚才的程序：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Example</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;user.dir: &quot;</span> + System.getProperty(<span class="string">&quot;user.dir&quot;</span>));</span><br><span class="line"></span><br><span class="line">        File file = <span class="keyword">new</span> File(<span class="string">&quot;hello.txt&quot;</span>);</span><br><span class="line">        file.createNewFile();</span><br><span class="line">        System.out.println(<span class="string">&quot;file created at: &quot;</span> + file.getAbsolutePath());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 D:\ 下执行，会创建 D:\hello.txt 文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">D:\&gt;java Example</span><br><span class="line">user.dir: D:\</span><br><span class="line">file created at: D:\\hello.txt</span><br></pre></td></tr></table></figure>
+
+<p>把 D:\hello.txt 删除掉，在 D:\ 下执行程序，但是人为修改 jvm 的 user.dir 属性：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">D:\&gt;java -Duser.dir&#x3D;&quot;d:\\demo&quot; Example</span><br><span class="line">user.dir: d:\\demo</span><br><span class="line">file created at: d:\demo\hello.txt</span><br></pre></td></tr></table></figure>
+
+<p>查看下 D 盘根目录，对的，你没有看错，真实创建的文件依然是 D:\hello.txt，而不是我们以为的 D:\demo\hello.txt。但是 File 类的方法，确实是受到了 user.dir 的影响，getAbsolutePath 方法返回的值是相对于 user.dir 的，与真实创建的文件不能对应。</p>
+<h4 id="结论："><a href="#结论：" class="headerlink" title="结论："></a>结论：</h4><p>Java 操作文件时，如果给定的是相对路径，Java 会使用 JVM 进程的启动路径作为参照来处理文件。但是 java.io 包在处理相对路径时，总是根据用户的当前工作目录来解析相对路径。</p>
+<p>所以，我们在处理文件的时候，最好都先把文件转换为绝对路径，再进行操作。</p>
+<h2 id="Linux-和-Windows-路径分隔符"><a href="#Linux-和-Windows-路径分隔符" class="headerlink" title="Linux 和 Windows 路径分隔符"></a>Linux 和 Windows 路径分隔符</h2><p>Linux 下：“/”</p>
+<p>Windows 下：“\”</p>
+<p>Java 中获取系统分隔符：System.getProperty(“file.separator”)</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/tutorial/essential/io/path.html">https://docs.oracle.com/javase/tutorial/essential/io/path.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/System.html#getProperties()">https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/System.html#getProperties()</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/7/docs/api/java/io/File.html">https://docs.oracle.com/javase/7/docs/api/java/io/File.html</a></p>
+
+        </div>
+        <footer>
+            <p class="meta">
+                <span class="byline author vcard">Posted by <span class="fn">pf #_</span></span>
+                <time datetime="2021-01-06T05:37:10.000Z" data-updated="true">Wed Jan 06 2021</time>
+                
+    <span class="categories">
+    
+        <a class="category" href="/tags/Java/">Java</a>,
+    
+        <a class="category" href="/tags/Resource/">Resource</a>,
+    
+        <a class="category" href="/tags/File/">File</a>
+    
+    </span>
+
+            </p>
+            <div class="sharing">
+    
+</div>
+
+            <p class="meta">
+                
+
+                
+                <a class="basic-alignment right" href="/" title="Previous Post: 一文读懂 Java Jar 包">一文读懂 Java Jar 包 »</a>
+                
+            </p>
+        </footer>
+    </article>
+
+    
+
+</div>
+
+<aside class="sidebar">
+    <section class="odd">
+    <h1>Recent Posts</h1>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/01/06/Java-%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84%E8%AF%A6%E8%A7%A3/">Java 文件路径详解</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/05/%E4%B8%80%E6%96%87%E8%AF%BB%E6%87%82-Java-Jar-%E5%8C%85/">一文读懂 Java Jar 包</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/01/04/Java-Package-%E8%AF%A6%E8%A7%A3/">Java Package 详解</a></li><li class="post-list-item"><a class="post-list-link" href="/2020/12/28/%E6%9E%9A%E4%B8%BE%EF%BC%88Enum%EF%BC%89%E8%AF%A6%E8%A7%A3/">Java 枚举（Enum）类型详解</a></li></ul>
+</section>
+
+<section class="even">
+    <h1>Featured posts</h1>
+    <ul>
+        
+    </ul>
+</section>
+</aside>
+
+    </div>
+</div>
+
+<footer role="contentinfo">
+    <p>
+        Copyright © 2021 - pf #_ -
+        <span class="credit">Generated using <a target="_blank" rel="noopener" href="https://github.com/jbreckmckye/hexo-theme-octo">Octo theme</a> for <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span>
+    </p>
+</footer>
+
+
+    <!-- scripts list from theme config.yml -->
+    
+        <script src="/js/optimize.js"></script>
+    
+
+
+</body>
+</html>
